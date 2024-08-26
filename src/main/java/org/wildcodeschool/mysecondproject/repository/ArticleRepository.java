@@ -12,4 +12,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("select a from Article a ORDER BY a.createdAt DESC")
     List<Article> findByOrder();
+
 }
