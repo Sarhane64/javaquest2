@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.mysecondproject.dto.ArticleDTO;
 import org.wildcodeschool.mysecondproject.model.Article;
 import org.wildcodeschool.mysecondproject.service.ArticleService;
+import jakarta.validation.Valid;
 
 
 import java.util.List;
@@ -36,13 +37,13 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<ArticleDTO> createArticle(@RequestBody Article article) {
+    public ResponseEntity<ArticleDTO> createArticle(@Valid @RequestBody Article article) {
         ArticleDTO savedArticleDTO = articleService.createArticle(article);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedArticleDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ArticleDTO> updateArticle(@PathVariable Long id, @RequestBody Article article) {
+    public ResponseEntity<ArticleDTO> updateArticle(@PathVariable Long id,@Valid @RequestBody Article article) {
         ArticleDTO updatedArticle = articleService.updateArticle(id, article);
         return ResponseEntity.ok(updatedArticle);
     }
