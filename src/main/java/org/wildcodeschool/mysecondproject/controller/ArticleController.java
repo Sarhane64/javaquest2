@@ -4,12 +4,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.mysecondproject.dto.ArticleDTO;
+import org.wildcodeschool.mysecondproject.dto.AuthorDTO;
 import org.wildcodeschool.mysecondproject.model.Article;
+import org.wildcodeschool.mysecondproject.model.ArticleAuthor;
 import org.wildcodeschool.mysecondproject.model.Category;
-import org.wildcodeschool.mysecondproject.repository.ArticleRepository;
-import org.wildcodeschool.mysecondproject.repository.CategoryRepository;
+import org.wildcodeschool.mysecondproject.model.Image;
+import org.wildcodeschool.mysecondproject.repository.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,10 +21,16 @@ import java.util.stream.Collectors;
 public class ArticleController {
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
+    private final ImageRepository imageRepository;
+    private final ArticleAuthorRepository articleAuthorRepository;
+    private final AuthorRepository authorRepository;
 
-    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository) {
+    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository,ArticleAuthorRepository articleAuthorRepository, AuthorRepository authorRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
+        this.imageRepository = imageRepository;
+        this.articleAuthorRepository = articleAuthorRepository;
+        this.authorRepository = authorRepository;
     }
 
     @GetMapping()
@@ -69,6 +78,24 @@ public class ArticleController {
             }
             article.setCategory(category);
         }
+        if (article.getImages() != null && !article.getImages().isEmpty()) {
+            List<Image> validImages = new ArrayList<>();
+            for (Image image : article.getImages()) {
+                if (image.getId() != null) {
+                    Image existingImage = imageRepository.findById(image.getId()).orElse(null);
+                    if (existingImage != null) {
+                        validImages.add(existingImage);
+                    } else {
+                        return ResponseEntity.badRequest().body(null);
+                    }
+                } else {
+                    Image savedImage = imageRepository.save(image);
+                    validImages.add(savedImage);
+                }
+            }
+            article.setImages(validImages);
+        }
+
 
         Article savedArticle = articleRepository.save(article);
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedArticle));
@@ -94,6 +121,21 @@ public class ArticleController {
         }
         if(article.getCategory() != null) {
             articleDTO.setCategoryName(article.getCategory().getName());
+        }
+        if (article.getImages() != null) {
+            articleDTO.setImageUrls(article.getImages().stream().map(Image::getUrl).collect(Collectors.toList()));
+        }
+        if (article.getArticleAuthors() != null) {
+            articleDTO.setAuthors(article.getArticleAuthors().stream()
+                    .filter(articleAuthor -> articleAuthor.getAuthor() != null)
+                    .map(articleAuthor -> {
+                        AuthorDTO authorDTO = new AuthorDTO();
+                        authorDTO.setId(articleAuthor.getAuthor().getId());
+                        authorDTO.setFirstName(articleAuthor.getAuthor().getFirstname());
+                        authorDTO.setLastName(articleAuthor.getAuthor().getLastname());
+                        return authorDTO;
+                    })
+                    .collect(Collectors.toList()));
         }
         return articleDTO;
     }

@@ -1,6 +1,7 @@
 package org.wildcodeschool.mysecondproject.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ArticleDTO {
     private Long id;
@@ -9,6 +10,35 @@ public class ArticleDTO {
     private LocalDateTime updatedAt;
     private Long categoryId;
     private String categoryName;
+    private List<String> imageUrls;
+    private List<AuthorDTO> Authors;
+
+    public List<AuthorDTO> getAuthors() {
+        return Authors;
+    }
+
+    public void setAuthors(List<AuthorDTO> authors) {
+        Authors = authors;
+    }
+
+    public List<String> getArticleAuthors() {
+        return ArticleAuthors;
+    }
+
+    public void setArticleAuthors(List<String> articleAuthors) {
+        ArticleAuthors = articleAuthors;
+    }
+
+    private List<String> ArticleAuthors;
+
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
 
     public Long getId() {
         return id;
